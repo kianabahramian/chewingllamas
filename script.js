@@ -308,8 +308,33 @@ function initMap() {
         // Create info window
         infoWindow = new google.maps.InfoWindow();
 
-        // Add markers for each restaurant
-        addRestaurantMarkers();
+        // Preload babyllama icon and compute scaled height to preserve aspect ratio
+        (function preloadBabyIconAndAddMarkers() {
+            const img = new Image();
+            img.src = './babyllama.png';
+
+            img.onload = function() {
+                try {
+                    const targetWidth = 48;
+                    const scaledHeight = Math.round(img.naturalHeight * (targetWidth / img.naturalWidth));
+                    const babyIcon = {
+                        url: './babyllama.png',
+                        scaledSize: new google.maps.Size(targetWidth, scaledHeight),
+                        anchor: new google.maps.Point(Math.round(targetWidth / 2), scaledHeight)
+                    };
+
+                    addRestaurantMarkers(babyIcon);
+                } catch (e) {
+                    console.warn('Failed to compute babyllama icon size, falling back to default markers', e);
+                    addRestaurantMarkers();
+                }
+            };
+
+            img.onerror = function() {
+                console.warn('Could not load babyllama.png, using default markers');
+                addRestaurantMarkers();
+            };
+        })();
         
         // Populate restaurant list and filters
         populateFilters();
@@ -324,17 +349,19 @@ function initMap() {
 }
 
 // Add markers for all restaurants
-function addRestaurantMarkers() {
+function addRestaurantMarkers(icon) {
     restaurants.forEach((restaurant) => {
-        const marker = new google.maps.Marker({
+        const markerOptions = {
             position: { lat: restaurant.lat, lng: restaurant.lng },
             map: map,
-            title: restaurant.name,
-            icon: {
-                url: 'babyllama.png',
-                scaledSize: new google.maps.Size(32, 32)
-            }
-        });
+            title: restaurant.name
+        };
+
+        if (icon) {
+            markerOptions.icon = icon;
+        }
+
+        const marker = new google.maps.Marker(markerOptions);
 
         // Add click listener to marker
         marker.addListener("click", () => {
