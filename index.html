@@ -14,26 +14,9 @@
     </header>
 
     <div class="container">
-        <!-- Search Controls at Top -->
-        <div class="search-section">
-            <h4>Find Restaurants</h4>
-            <div class="search-controls">
-                <input type="text" id="search-input" placeholder="Search by name, cuisine, or neighborhood..." class="search-input">
-                <div class="filter-buttons">
-                    <select id="cuisine-filter" class="filter-select">
-                        <option value="">All Cuisines</option>
-                    </select>
-                    <select id="neighborhood-filter" class="filter-select">
-                        <option value="">All Areas</option>
-                    </select>
-                </div>
-                <button id="clear-filters" class="clear-btn">Clear All</button>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Restaurant Info Panel (Left) -->
+        <!-- Two Panel Container: Restaurant Search + Map -->
+        <div class="top-panels">
+            <!-- Restaurant Info Panel -->
             <div class="sidebar">
                 <div id="restaurant-info" class="restaurant-card">
                     <h3>Select a restaurant marker to view details</h3>
@@ -41,24 +24,39 @@
                 </div>
                 
                 <div class="restaurant-list">
+                    <div class="search-section">
+                        <h4>Find Restaurants</h4>
+                        <div class="search-controls">
+                            <input type="text" id="search-input" placeholder="Search by name, cuisine, or neighborhood..." class="search-input">
+                            <div class="filter-buttons">
+                                <select id="cuisine-filter" class="filter-select">
+                                    <option value="">All Cuisines</option>
+                                </select>
+                                <select id="neighborhood-filter" class="filter-select">
+                                    <option value="">All Areas</option>
+                                </select>
+                            </div>
+                            <button id="clear-filters" class="clear-btn">Clear All</button>
+                        </div>
+                    </div>
                     <div id="restaurant-list-container">
                         <!-- Restaurant list items will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
 
-            <!-- Centered Map Container -->
+            <!-- Google Map Container -->
             <div class="map-container">
                 <div id="map"></div>
             </div>
+        </div>
 
-            <!-- Photo Gallery Section (Right) -->
-            <div class="photo-gallery-container">
-                <div id="photo-gallery" class="photo-gallery">
-                    <div class="gallery-placeholder">
-                        <h3>📸 Restaurant Photos</h3>
-                        <p>Select a restaurant to see review photos and food images</p>
-                    </div>
+        <!-- Photo Gallery Section - Full Width -->
+        <div class="photo-gallery-container-full">
+            <div id="photo-gallery" class="photo-gallery">
+                <div class="gallery-placeholder">
+                    <h3>📸 Restaurant Photos</h3>
+                    <p>Select a restaurant to see review photos and food images</p>
                 </div>
             </div>
         </div>

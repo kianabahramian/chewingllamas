@@ -331,9 +331,8 @@ function addRestaurantMarkers() {
             map: map,
             title: restaurant.name,
             icon: {
-                url: 'pin.png',
-                scaledSize: new google.maps.Size(40, 0),
-                anchor: new google.maps.Point(20, 0)
+                url: 'babyllama.png',
+                scaledSize: new google.maps.Size(32, 32)
             }
         });
 
