@@ -272,6 +272,25 @@ const restaurants = [
     }
 ];
 
+// Append placeholder Yelp collection entries (pending coordinates)
+restaurants.push(
+    { id: 16, name: "Kiez Küche & Beer Garden", cuisine: "German / Beer Garden", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 17, name: "Piccadilly Grace", cuisine: "Coffee & Sandwiches", neighborhood: "South Pasadena", address: "South Pasadena, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 18, name: "Union Street French Café", cuisine: "Cafe", neighborhood: "Pasadena", address: "Pasadena, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 19, name: "Torotea", cuisine: "Coffee & Tea", neighborhood: "San Marino", address: "San Marino, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 20, name: "Yi Mei", cuisine: "Taiwanese / Breakfast", neighborhood: "San Gabriel", address: "San Gabriel, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 21, name: "6XS COFFEE", cuisine: "Coffee & Tea", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 22, name: "Ojai Burger", cuisine: "Burgers / Beer Bar", neighborhood: "Orange", address: "Orange, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 23, name: "Memorylook", cuisine: "Coffee & Bakery", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 24, name: "Rny Coffee Studio", cuisine: "Coffee & Tea", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 25, name: "HanEuem", cuisine: "Korean", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 26, name: "Danbi", cuisine: "Korean", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 27, name: "Jinsol Gukbap - 3rd St", cuisine: "Korean / Soup", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 28, name: "MDK Noodles", cuisine: "Korean / Noodles", neighborhood: "Los Angeles", address: "Los Angeles, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 29, name: "Happy Together", cuisine: "Cantonese / Dim Sum", neighborhood: "Chino Hills", address: "Chino Hills, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true },
+    { id: 30, name: "Lunasia Dim Sum House", cuisine: "Dim Sum / Soup", neighborhood: "Torrance", address: "Torrance, CA", lat: null, lng: null, rating: 0, description: "Placeholder from Yelp collection. Coordinates needed.", photos: [], needsCoordinates: true }
+);
+
 // Google Maps variables
 let map;
 let markers = [];
@@ -324,15 +343,19 @@ function initMap() {
                     };
 
                     addRestaurantMarkers(babyIcon);
+                    // Geocode placeholder restaurants and add their markers
+                    geocodeMissingRestaurants(babyIcon);
                 } catch (e) {
                     console.warn('Failed to compute babyllama icon size, falling back to default markers', e);
                     addRestaurantMarkers();
+                    geocodeMissingRestaurants();
                 }
             };
 
             img.onerror = function() {
                 console.warn('Could not load babyllama.png, using default markers');
                 addRestaurantMarkers();
+                geocodeMissingRestaurants();
             };
         })();
         
@@ -351,6 +374,10 @@ function initMap() {
 // Add markers for all restaurants
 function addRestaurantMarkers(icon) {
     restaurants.forEach((restaurant) => {
+        // Skip if coordinates missing
+        if (restaurant.lat == null || restaurant.lng == null) {
+            return;
+        }
         const markerOptions = {
             position: { lat: restaurant.lat, lng: restaurant.lng },
             map: map,
@@ -377,6 +404,63 @@ function addRestaurantMarkers(icon) {
         // Store marker with restaurant ID for easy access
         markers.push({ marker, restaurant });
     });
+}
+
+// Geocode restaurants that lack coordinates and add markers dynamically
+function geocodeMissingRestaurants(icon) {
+    if (typeof google === 'undefined' || !google.maps) {
+        console.warn('Google Maps library unavailable for geocoding');
+        return;
+    }
+    const pending = restaurants.filter(r => (r.lat == null || r.lng == null) && r.needsCoordinates);
+    if (!pending.length) {
+        return;
+    }
+    const geocoder = new google.maps.Geocoder();
+    let index = 0;
+    console.log(`Geocoding ${pending.length} placeholder restaurants...`);
+
+    function processNext() {
+        if (index >= pending.length) {
+            console.log('Geocoding complete');
+            // Refresh list so markers correspond
+            populateRestaurantList();
+            return;
+        }
+        const r = pending[index];
+        const queryAddress = r.address || `${r.name}, ${r.neighborhood || 'Los Angeles, CA'}`;
+        geocoder.geocode({ address: queryAddress }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+                const loc = results[0].geometry.location;
+                r.lat = loc.lat();
+                r.lng = loc.lng();
+                r.needsCoordinates = false;
+                console.log(`Geocoded: ${r.name} → (${r.lat}, ${r.lng})`);
+                // Create marker for this restaurant
+                const markerOptions = {
+                    position: { lat: r.lat, lng: r.lng },
+                    map: map,
+                    title: r.name
+                };
+                if (icon) markerOptions.icon = icon;
+                const marker = new google.maps.Marker(markerOptions);
+                marker.addListener('click', () => {
+                    showRestaurantInfo(r);
+                    highlightRestaurantInList(r.id);
+                    const infoContent = createInfoWindowContent(r);
+                    infoWindow.setContent(infoContent);
+                    infoWindow.open(map, marker);
+                });
+                markers.push({ marker, restaurant: r });
+            } else {
+                console.warn(`Geocode failed for ${r.name}: ${status}`);
+            }
+            index++;
+            // Throttle requests to avoid hitting rate limits
+            setTimeout(processNext, 250);
+        });
+    }
+    processNext();
 }
 
 // Create info window content
