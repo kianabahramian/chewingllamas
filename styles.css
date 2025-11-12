@@ -7,20 +7,24 @@
 
 /* Apple Design Palette Variables */
 :root {
-    /* Neutrals */
+    /* Updated Palette (from colorpalette.jpg) */
+    /* Core Text */
     --apple-text: #1d1d1f;
-    --apple-secondary-text: #86868b;
+    --apple-secondary-text: #A2848D; /* secondary */
+    /* Surfaces */
     --apple-border: rgba(0,0,0,0.12);
     --apple-card-bg: rgba(255,255,255,0.75);
     --apple-page-bg: #f5f5f7;
     --apple-frosted-bg: rgba(255,255,255,0.8);
     --apple-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.12);
-    /* Accent Blues (Apple typical) */
-    --apple-blue: #0071e3;
-    --apple-blue-alt: #2997ff;
+    /* Accent / Primary */
+    --apple-blue: #D82C8B; /* primary */
+    --apple-blue-alt: #EB4DA4; /* primary hover */
+    --apple-selected: #FE6DBC; /* selected state */
+    --apple-secondary-accent: #47B7B1; /* secondary hover / alt accent */
     --apple-gradient: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-alt) 100%);
-    /* Focus Ring */
-    --apple-focus: 0 0 0 3px rgba(0,113,227,0.35);
+    /* Focus Ring derived from primary */
+    --apple-focus: 0 0 0 3px rgba(216,44,139,0.35);
 }
 
 body {
@@ -247,6 +251,12 @@ header p {
 .restaurant-card {
     padding: 32px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: rgba(255,255,255,0.9); /* ensure opaque over scrolling content */
+    backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 4px 12px -2px rgba(0,0,0,0.08);
 }
 
 .restaurant-card h3 {
@@ -357,7 +367,7 @@ header p {
     border-color: var(--apple-blue);
     background: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 122, 255, 0.15);
+    box-shadow: 0 8px 30px rgba(216, 44, 139, 0.25);
 }
 
 .filter-buttons {
@@ -395,30 +405,45 @@ header p {
 
 .clear-btn {
     padding: 12px 24px;
-    background: var(--apple-blue);
-    color: white;
-    border: none;
+    background: transparent;
+    color: var(--apple-blue);
+    border: 1px solid var(--apple-blue);
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    backdrop-filter: saturate(180%) blur(20px);
 }
 
 .clear-btn:hover {
-    background: #0051d0;
+    background: var(--apple-blue);
+    color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 122, 255, 0.2);
+    box-shadow: 0 8px 30px rgba(216, 44, 139, 0.35);
+}
+
+.clear-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
+}
+
+.clear-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--apple-focus);
 }
 
 .restaurant-list-item {
-    padding: 20px;
+    padding: 20px 16px 20px 20px; /* right reduced to 16px to meet spacing requirement */
     margin-bottom: 12px;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     border: 1px solid rgba(0, 0, 0, 0.1);
     background: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* keep heart anchored right */
 }
 
 .restaurant-list-item:hover {
@@ -429,10 +454,16 @@ header p {
 }
 
 .restaurant-list-item.active {
-    background: var(--apple-blue);
-    color: white;
+    background: var(--apple-blue); /* switched from selected to primary */
+    color: #ffffff;
     border-color: var(--apple-blue);
-    box-shadow: 0 8px 30px rgba(0, 122, 255, 0.3);
+    box-shadow: 0 8px 30px rgba(216, 44, 139, 0.35);
+}
+
+/* Ensure nested text inside active item is white */
+.restaurant-list-item.active h5,
+.restaurant-list-item.active .cuisine {
+    color: #ffffff;
 }
 
 .restaurant-list-item.hidden {
@@ -460,6 +491,73 @@ header p {
 .restaurant-list-item .cuisine {
     font-size: 0.8rem;
     opacity: 0.8;
+}
+
+/* Semibold cuisine/neighborhood line when active */
+.restaurant-list-item.active .cuisine {
+    font-weight: 600;
+    opacity: 1;
+}
+
+/* Favorite (heart) button */
+.favorite-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    /* removed explicit margin-right; right padding on container is 16px */
+    position: relative;
+}
+
+.favorite-btn:hover {
+    background: rgba(0,113,227,0.08);
+    transform: translateY(-2px);
+}
+
+.favorite-btn:active {
+    transform: translateY(0);
+}
+
+.favorite-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--apple-focus);
+}
+
+.favorite-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--apple-blue);
+    stroke-width: 2;
+    fill: transparent; /* outline state */
+    transition: fill 0.25s ease, stroke 0.25s ease;
+    pointer-events: none;
+}
+
+/* Favorited (filled) state */
+.favorite-btn.favorited svg {
+    fill: var(--apple-blue);
+    stroke: var(--apple-blue);
+}
+
+/* Invert heart icon to white when parent list item is active */
+/* Active list item overrides: keep contrast; if heart favorited keep primary tone */
+/* Keep heart outline/fill logic even when list item is active for clearer favorite state */
+.restaurant-list-item.active .favorite-btn svg {
+    stroke: var(--apple-blue);
+}
+.restaurant-list-item.active .favorite-btn.favorited svg {
+    fill: var(--apple-blue);
+    stroke: var(--apple-blue);
+}
+
+.restaurant-text {
+    flex: 1;
 }
 
 /* Map Container */
@@ -501,6 +599,129 @@ footer {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     font-size: 17px;
     line-height: 1.47059;
+}
+
+/* Favorites Section */
+.favorites-section {
+    width: 100%;
+    background: var(--apple-card-bg);
+    backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid var(--apple-border);
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: var(--apple-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.favorites-header h3 {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    margin-bottom: 4px;
+    background: var(--apple-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.favorites-sub {
+    font-size: 15px;
+    color: var(--apple-secondary-text);
+}
+
+.favorites-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.favorites-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 32px;
+    color: var(--apple-secondary-text);
+    background: rgba(255,255,255,0.6);
+    border: 1px dashed var(--apple-border);
+    border-radius: 16px;
+    font-size: 15px;
+}
+
+.favorite-card {
+    position: relative;
+    padding: 20px 16px 20px 20px;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+.favorite-card:hover {
+    background: rgba(255,255,255,0.95);
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px -4px rgba(0,0,0,0.15);
+    border-color: var(--apple-blue);
+}
+
+.favorite-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.favorite-card .fav-meta {
+    font-size: 13px;
+    color: var(--apple-secondary-text);
+    font-weight: 500;
+}
+
+.favorite-card .fav-heart-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.favorite-card .fav-heart-btn:hover {
+    transform: scale(1.1);
+}
+
+.favorite-card .fav-heart-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--apple-blue);
+    fill: var(--apple-blue);
+    stroke-width: 2;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.favorite-card .fav-heart-btn:hover svg {
+    filter: brightness(1.1) saturate(1.2);
+}
+
+@media (max-width: 768px) {
+    .favorites-section {
+        padding: 24px;
+    }
+    .favorites-container {
+        grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+        gap: 16px;
+    }
 }
 
 /* Responsive Design */

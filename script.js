@@ -296,6 +296,8 @@ let map;
 let markers = [];
 let infoWindow;
 let filteredRestaurants = restaurants;
+// Favorites (persisted)
+const favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
 
 // Initialize the map
 function initMap() {
@@ -569,11 +571,24 @@ function populateRestaurantList() {
         const listItem = document.createElement('div');
         listItem.className = 'restaurant-list-item';
         listItem.dataset.restaurantId = restaurant.id;
-        
+        // Build inner structure: text block + favorite button
         listItem.innerHTML = `
-            <h5>${restaurant.name}</h5>
-            <div class="cuisine">${restaurant.cuisine} • ${restaurant.neighborhood}</div>
+            <div class="restaurant-text">
+                <h5>${restaurant.name}</h5>
+                <div class="cuisine">${restaurant.cuisine} • ${restaurant.neighborhood}</div>
+            </div>
+            <button class="favorite-btn" aria-label="Favorite ${restaurant.name}" aria-pressed="false" data-restaurant-id="${restaurant.id}">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21s-1.45-1.32-3.27-3.02C6.22 15.7 4 13.66 4 10.9 4 8.78 5.7 7 7.8 7c1.3 0 2.54.62 3.3 1.6.76-.98 2-1.6 3.3-1.6 2.1 0 3.8 1.78 3.8 3.9 0 2.76-2.22 4.8-4.73 7.08C13.45 19.68 12 21 12 21Z"/>
+                </svg>
+            </button>
         `;
+        // Apply favorited visual state if present
+        const favBtnInitial = listItem.querySelector('.favorite-btn');
+        if (favorites.has(restaurant.id)) {
+            favBtnInitial.classList.add('favorited');
+            favBtnInitial.setAttribute('aria-pressed', 'true');
+        }
         
         // Add click listener to list item
         listItem.addEventListener('click', () => {
@@ -594,8 +609,86 @@ function populateRestaurantList() {
                 infoWindow.open(map, markerData.marker);
             }
         });
+
+        // Favorite button toggle (visual only for now)
+        const favBtn = listItem.querySelector('.favorite-btn');
+        favBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering list item click
+            toggleFavorite(restaurant.id, favBtn);
+        });
         
         listContainer.appendChild(listItem);
+    });
+}
+
+// Toggle favorite state
+function toggleFavorite(id, buttonEl) {
+    if (favorites.has(id)) {
+        favorites.delete(id);
+    } else {
+        favorites.add(id);
+    }
+    // Persist
+    localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
+    // Update button UI if provided
+    if (buttonEl) {
+        const isFav = favorites.has(id);
+        buttonEl.classList.toggle('favorited', isFav);
+        buttonEl.setAttribute('aria-pressed', isFav ? 'true' : 'false');
+    }
+    renderFavorites();
+}
+
+// Render favorites section
+function renderFavorites() {
+    const container = document.getElementById('favorites-container');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!favorites.size) {
+        container.innerHTML = '<div class="favorites-empty">No favorites yet. Tap a heart to save one.</div>';
+        return;
+    }
+    const favList = restaurants.filter(r => favorites.has(r.id));
+    favList.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'favorite-card';
+        card.dataset.restaurantId = r.id;
+        card.innerHTML = `
+            <button class="fav-heart-btn" aria-label="Unfavorite ${r.name}" data-restaurant-id="${r.id}">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21s-1.45-1.32-3.27-3.02C6.22 15.7 4 13.66 4 10.9 4 8.78 5.7 7 7.8 7c1.3 0 2.54.62 3.3 1.6.76-.98 2-1.6 3.3-1.6 2.1 0 3.8 1.78 3.8 3.9 0 2.76-2.22 4.8-4.73 7.08C13.45 19.68 12 21 12 21Z" fill="currentColor" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </button>
+            <h4>${r.name}</h4>
+            <div class="fav-meta">${r.cuisine} • ${r.neighborhood}</div>
+        `;
+        // Click card selects restaurant
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.fav-heart-btn')) return; // ignore heart button click here
+            const markerData = markers.find(m => m.restaurant.id === r.id);
+            if (markerData) {
+                map.panTo(markerData.marker.getPosition());
+                map.setZoom(15);
+                showRestaurantInfo(r);
+                highlightRestaurantInList(r.id);
+                const infoContent = createInfoWindowContent(r);
+                infoWindow.setContent(infoContent);
+                infoWindow.open(map, markerData.marker);
+            }
+        });
+        // Heart button inside favorite card to remove
+        card.querySelector('.fav-heart-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFavorite(r.id);
+            // Also update corresponding list item button
+            const listBtn = document.querySelector(`.restaurant-list-item [data-restaurant-id="${r.id}"]`);
+            if (listBtn) {
+                const isFav = favorites.has(r.id);
+                listBtn.classList.toggle('favorited', isFav);
+                listBtn.setAttribute('aria-pressed', isFav ? 'true' : 'false');
+            }
+        });
+        container.appendChild(card);
     });
 }
 
@@ -776,6 +869,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof google !== 'undefined' && google.maps) {
         console.log('Google Maps already loaded');
         initMap();
+        renderFavorites();
     } else {
         console.log('Google Maps not ready, waiting...');
         // Wait a bit and try again
@@ -790,6 +884,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 populateFilters();
                 populateRestaurantList();
                 setupSearchListeners();
+                renderFavorites();
             }
         }, 3000);
     }
@@ -807,6 +902,7 @@ window.addEventListener('load', () => {
             populateFilters();
             populateRestaurantList();
             setupSearchListeners();
+            renderFavorites();
         }
     }, 5000);
 });
