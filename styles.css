@@ -14,7 +14,7 @@
     /* Surfaces */
     --apple-border: rgba(0,0,0,0.12);
     --apple-card-bg: rgba(255,255,255,0.75);
-    --apple-page-bg: #f5f5f7;
+    --apple-page-bg: #f9f5ec; /* light beige */
     --apple-frosted-bg: rgba(255,255,255,0.8);
     --apple-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.12);
     /* Accent / Primary */
@@ -33,7 +33,7 @@ body {
     font-weight: 400;
     letter-spacing: -0.022em;
     color: #1d1d1f;
-    background: #f5f5f7;
+    background: var(--apple-page-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -53,11 +53,26 @@ header h1 {
     font-weight: 600;
     line-height: 1.07143;
     letter-spacing: -0.005em;
-    margin-bottom: 8px;
+    margin-bottom: 24px; /* equal spacing below title */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center; /* center title + emoji horizontally */
+    gap: 8px;
+}
+
+.title-gradient {
     background: var(--apple-gradient);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.title-emoji {
+    font-size: 48px; /* slightly smaller to balance baseline */
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
 }
 
 header p {
@@ -68,6 +83,26 @@ header p {
     color: #86868b;
     max-width: 580px;
     margin: 0 auto;
+}
+
+
+.author-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 24px; /* 24px below avatar */
+    border: 4px solid #fff;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.6);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.author-avatar:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 6px 16px rgba(0,0,0,0.12);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Main Container */
