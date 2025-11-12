@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Test - Debug</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; }
+        #map { width: 100%; height: 400px; border: 2px solid #007aff; border-radius: 12px; }
+        .debug { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .error { background: #ffe6e6; color: #d32323; }
+        .success { background: #e6ffe6; color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Google Maps Debug Test</h1>
+    
+    <div id="status" class="debug">
+        <h3>Status:</h3>
+        <p>Checking Google Maps API...</p>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="debug">
+        <h3>Troubleshooting Steps:</h3>
+        <ol>
+            <li><strong></strong>Check browser console (F12)</strong> for error messages</li>
+            <li><strong>API Key Issues:</strong> Verify key is correct and not restricted</li>
+            <li><strong>Enable API:</strong> "Maps JavaScript API" must be enabled in Google Cloud Console</li>
+            <li><strong>Billing:</strong> Google requires billing enabled (free tier available)</li>
+            <li><strong>Domain restrictions:</strong> Check if API key is restricted to specific domains</li>
+            <li><strong>Try incognito mode:</strong> Rules out browser cache issues</li>
+        </ol>
+        <p><strong>Common Error Messages:</strong></p>
+        <ul>
+            <li>"This API project is not authorized" = Billing not enabled</li>
+            <li>"API key not valid" = Wrong key or restrictions</li>
+            <li>"RefererNotAllowedMapError" = Domain restrictions</li>
+            <li>Nothing loads = Network/firewall blocking</li>
+        </ul>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'debug') {
+            const status = document.getElementById('status');
+            status.className = `debug ${type}`;
+            status.innerHTML = `<h3>Status:</h3><p>${message}</p>`;
+            console.log(message);
+        }
+
+        function initMap() {
+            updateStatus('✅ Google Maps API loaded successfully!', 'success');
+            
+            try {
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 13,
+                    center: { lat: 34.0522, lng: -118.2437 } // Los Angeles
+                });
+
+                // Add a test marker
+                new google.maps.Marker({
+                    position: { lat: 34.0522, lng: -118.2437 },
+                    map: map,
+                    title: 'Test Marker - LA'
+                });
+
+                updateStatus('🎉 Map created successfully with test marker!', 'success');
+            } catch (error) {
+                updateStatus(`❌ Error creating map: ${error.message}`, 'error');
+                console.error('Map creation error:', error);
+            }
+        }
+
+        // Error handler for authentication failures
+        window.gm_authFailure = function() {
+            updateStatus('❌ Authentication failed - check your API key', 'error');
+        };
+
+        // Check if script loads
+        updateStatus('🔄 Loading Google Maps API...');
+
+        // Timeout check
+        setTimeout(() => {
+            if (typeof google === 'undefined') {
+                updateStatus('❌ Google Maps API failed to load - check your internet connection and API key', 'error');
+            }
+        }, 10000);
+
+        // Make initMap global
+        window.initMap = initMap;
+    </script>
+
+    <!-- Your API key -->
+    <script async defer 
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAM608Vk4IEzyHfattqjcgALo0bKOwLqDg&callback=initMap">
+    </script>
+</body>
+</html>

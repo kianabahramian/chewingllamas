@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LA Restaurant Guide | Chewing Llamas</title>
+    <link rel="stylesheet" href="styles-no-map.css">
+</head>
+<body>
+    <header>
+        <h1>🦙 Chewing Llamas - LA Restaurant Guide</h1>
+        <p>Discover amazing restaurants across Los Angeles</p>
+    </header>
+
+    <div class="container-no-map">
+        <!-- Restaurant Info Panel -->
+        <div class="sidebar">
+            <div id="restaurant-info" class="restaurant-card">
+                <h3>Select a restaurant to view details</h3>
+                <p>Click on any restaurant from the list to see information about cuisine, location, and more!</p>
+            </div>
+            
+            <div class="restaurant-list">
+                <div class="search-section">
+                    <h4>Find Restaurants</h4>
+                    <div class="search-controls">
+                        <input type="text" id="search-input" placeholder="Search by name, cuisine, or neighborhood..." class="search-input">
+                        <div class="filter-buttons">
+                            <select id="cuisine-filter" class="filter-select">
+                                <option value="">All Cuisines</option>
+                            </select>
+                            <select id="neighborhood-filter" class="filter-select">
+                                <option value="">All Areas</option>
+                            </select>
+                        </div>
+                        <button id="clear-filters" class="clear-btn">Clear All</button>
+                    </div>
+                </div>
+                <div id="restaurant-list-container">
+                    <!-- Restaurant list items will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Gallery Section -->
+        <div class="photo-gallery-container">
+            <div id="photo-gallery" class="photo-gallery">
+                <div class="gallery-placeholder">
+                    <h3>📸 Restaurant Photos</h3>
+                    <p>Select a restaurant to see review photos and food images</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurant Details Section -->
+        <div class="details-container">
+            <div id="restaurant-details" class="restaurant-details">
+                <div class="details-placeholder">
+                    <h3>🗺️ Restaurant Location</h3>
+                    <p>Interactive map coming soon!</p>
+                    <div style="margin-top: 20px;">
+                        <a href="https://console.cloud.google.com/" target="_blank" style="
+                            background: #007aff; 
+                            color: white; 
+                            padding: 12px 24px; 
+                            border-radius: 12px; 
+                            text-decoration: none; 
+                            font-weight: 600;
+                            display: inline-block;
+                        ">Get Free Maps API Key</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Chewing Llamas. Discover the best flavors in LA!</p>
+    </footer>
+
+    <!-- Photo Modal -->
+    <div id="photo-modal" class="photo-modal" style="display: none;">
+        <span class="photo-close">&times;</span>
+        <div class="photo-modal-content">
+            <img id="modal-image" src="" alt="">
+            <div id="modal-caption" style="color: white; text-align: center; padding: 1rem; background: rgba(0,0,0,0.8);"></div>
+        </div>
+    </div>
+
+    <script src="script-no-map.js"></script>
+</body>
+</html>
